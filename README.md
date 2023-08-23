@@ -19,7 +19,41 @@ pip install -r requirements.txt
 ## Data Generation
 
 ```shell
-python data_generation.py NUM_GPUS --cfg_file PATH_TO_CONFIG_FILE
-#For example,
-bash scripts/dist_train.sh 8 --cfg_file PATH_TO_CONFIG_FILE
+python data_generation.py --save_dir SAVE_DIRECTORY --seq AMOUNT_SEQUENCES 
 ```
+
+Dataset with the following folder structure should be generated
+```
+
+├──data/
+    ├── sequence0000/           
+    │   ├── cos_ang/
+    |         ├── 0.npy
+    |         └── ... 
+    |   ├── labels/
+    |         ├── 0.npy
+    |         └── ... 
+    │   └── pointcloud/
+    |         ├── 0.npy
+    |         └── ... 
+    └── sequenceXXXX/
+        └── ...
+```
+## Data Visualization
+```shell
+python vis_data.py --data_dir PATH_TO_DATA --sample_seq SEQUENCE_IDX --sample SAMPLE_IDX
+```
+
+# Citation
+Please cite our paper if this code benefits your research:
+```
+@InProceedings{leuze_2023_IEEESensors,
+author = {Leuze, Nico and Schaub, Henry and Hoh, Maximilian and Schoettl, Alfred},
+title = {SSL-VoxPart: A Novel Solid-State LiDAR-Tailored Voxel Partition Approach for 3D Perception},
+booktitle = {Proceedings of the 2023 IEEESensors},
+month = {October},
+year = {2023}
+}
+```
+
+
