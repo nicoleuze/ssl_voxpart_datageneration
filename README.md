@@ -7,6 +7,8 @@ carla v0.9.13.
 requirements.txt
 ## Data Generation
 
-$$
-python data_generation
-$$
+```shell
+python data_generation.py NUM_GPUS --cfg_file PATH_TO_CONFIG_FILE
+#For example,
+bash scripts/dist_train.sh 8 --cfg_file PATH_TO_CONFIG_FILE
+```
