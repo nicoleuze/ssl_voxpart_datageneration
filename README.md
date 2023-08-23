@@ -7,10 +7,11 @@ Data Generation Pipeline corresponding to the IEEE Sensors 2023 Conference Paper
 ```shell
 git clone https://github.com/nicoleuze/sslvoxpart_datagen && cd sslvoxpart_datagen
 ```
-### 2. Install CARLA 
+### 2. Install CARLA
 Following the install documents from the official [Carla Documentation](https://carla.readthedocs.io/en/0.9.13/start_quickstart/)
 > Code is tested with CARLA Version 0.9.13 on Ubuntu 20.04
 
+### 3. Install Dependencies
 Install dependencies by 
 ```shell
 pip install -r requirements.txt
