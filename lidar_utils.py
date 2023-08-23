@@ -13,6 +13,21 @@
 # Copyright (c) 2023 MUAS
 #################################################################################
 
+
+"""
+LiDAR Configurations
+"""
+lidar_configs = {
+    'channels':             32,
+    'range':              10.0,
+    'points_per_second': 56000,
+    'rotation_frequency': 10.0,
+    'upper_fov':          10.0,
+    'lower_fov':         -30.0,
+    'horizontal_fov':    70.0,
+    'sensor_tick':         0.0
+}
+
 def generate_lidar_bp(arg, world, blueprint_library, delta):
     """Generates a CARLA blueprint based on the script parameters"""
     arg.semantic = True
@@ -27,10 +42,10 @@ def generate_lidar_bp(arg, world, blueprint_library, delta):
         else:
             lidar_bp.set_attribute('noise_stddev', '0.2')
 
-    lidar_bp.set_attribute('upper_fov', str(arg.upper_fov))
-    lidar_bp.set_attribute('lower_fov', str(arg.lower_fov))
-    lidar_bp.set_attribute('channels', str(arg.channels))
-    lidar_bp.set_attribute('range', str(arg.range))
-    lidar_bp.set_attribute('rotation_frequency', str(1.0 / delta))
-    lidar_bp.set_attribute('points_per_second', str(arg.points_per_second))
+    lidar_bp.set_attribute('upper_fov', str(lidar_configs['upper_fov']))
+    lidar_bp.set_attribute('lower_fov', str(lidar_configs['lower_fov']))
+    lidar_bp.set_attribute('channels', str(lidar_configs['channels']))
+    lidar_bp.set_attribute('range', str(lidar_configs['range']))
+    lidar_bp.set_attribute('rotation_frequency', str(lidar_configs['rotation_frequency']))
+    lidar_bp.set_attribute('points_per_second', str(lidar_configs['points_per_second']))
     return lidar_bp

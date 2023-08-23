@@ -7,7 +7,7 @@
 #         Faculty of Electrical Engineering and Information Technology
 #         Institute for Applications of Machine Learning and Intelligent Systems
 # -----
-# Last Modified: XX.XX.202X
+# Last Modified: 23.08.2023
 # Modified By: Nico Leuze
 # -----
 # Copyright (c) 2023 MUAS
@@ -20,10 +20,8 @@ from datetime import datetime
 import random
 import numpy as np
 from matplotlib import cm
-import open3d as o3d
-import blickfeld_utils
+import lidar_utils
 import carla
-import matplotlib.pyplot as plt
 
 """
 GENERATION OF HALF SPHERE
@@ -65,27 +63,31 @@ MEMORY READER SENSOR DATA
 def raw_pointcloud2array(pc_data):
     """
     params in: pc_data
-    params out: cloud (x, y, z, intensity), cloud_parameters (point_id, object_idx, object_tag)
+    params out: cloud (x, y, z, cos_ang), cloud_parameters (object_idx, object_tag)
     """
 
     # Extract PointCloud Information:
-    cloudFromBuffer = np.frombuffer(pc_data, dtype=np.float32, count=(np.int(np.shape(pc_data)[0]/4)))
-    x = cloudFromBuffer[0::7]
-    y = cloudFromBuffer[1::7]
-    z = cloudFromBuffer[2::7]
-    int = cloudFromBuffer[3::7]
+    data = np.frombuffer(pc_data, dtype=np.dtype([
+        ('x', np.float32), ('y', np.float32), ('z', np.float32),
+        ('CosAngle', np.float32), ('ObjIdx', np.uint32), ('ObjTag', np.uint32)]))
+    
+
+    x = np.array(data['x'])
+    y = np.array(data['y'])
+    z = np.array(data['z'])
 
     # Extract PointCloud Parameters Information:
-    cloudparametersFromBuffer = np.frombuffer(pc_data, dtype=np.int32, count=(np.int(np.shape(pc_data)[0] / 4)))
-    point_id = cloudparametersFromBuffer[4::7]
-    object_idx = cloudparametersFromBuffer[5::7]
-    object_tag = cloudparametersFromBuffer[6::7]
+    cos_ang = np.array(data['CosAngle'])
+    object_idx = np.array(data['ObjIdx'])
+    object_tag = np.array(data['ObjTag'])
+
     # invert pointcloud_about_y_axis:
     # point_cloud_array mirrored point cloud about y-axis: lhs to rhs conversion
     y = y * -1
+    
     # Stack arrays to PointCloud and PointCloud Parameters:
-    cloud = np.stack((x, y, z, int)).T.reshape((-1, 4))
-    cloud_parameters = np.stack((point_id, object_idx, object_tag)).T.reshape((-1, 3))
+    cloud = np.stack((x, y, z, cos_ang)).T.reshape((-1, 4))
+    cloud_parameters = np.stack((object_idx, object_tag)).T.reshape((-1, 2))
     return cloud, cloud_parameters
 
 
@@ -98,16 +100,16 @@ def lidar_callback(data):
     colors ready to be consumed by Open3D"""
     point_cloud_bf = data.raw_data
 
-    # params: cloud (x, y, z, intensity), cloud_parameters (point_id, object_idx, object_tag)
+    # params: cloud (x, y, z, cos_ang), cloud_parameters (object_idx, object_tag)
     point_cloud_bf, cloud_parameters = raw_pointcloud2array(point_cloud_bf)
 
     # Isolate the 3D data
     points = point_cloud_bf[:, :3]
-    intensity = point_cloud_bf[:, 3]
+    cos_ang = point_cloud_bf[:, 3]
 
     # Isolate the Labels and Instances from the Cloud Parameters:
-    labels = cloud_parameters[:, 2]
-    instances = cloud_parameters[:, 1]
+    labels = cloud_parameters[:, 1]
+    instances = cloud_parameters[:, 0]
 
     # Saving the Labels and Instances to np.array(n, 2) with idx0 = labels, idx1 = instances:
     # REMINDER: gt_labels_inst[0] = labels, gt_labels_inst[1] = instances
@@ -117,8 +119,8 @@ def lidar_callback(data):
     points_dir = store_dir_pc + data_index
     np.save(points_dir, points)
 
-    intensity_dir = store_dir_pcint + data_index
-    np.save(intensity_dir, intensity)
+    cos_ang_dir = store_dir_pccosang + data_index
+    np.save(cos_ang_dir, cos_ang)
 
     labels_dir = store_dir_labels + data_index
     np.save(labels_dir, gt_labels_inst)
@@ -129,41 +131,44 @@ def lidar_callback(data):
 MAIN PROGRAM
 """
 
-def main():
+def main(args):
     """
     Sensor related settings:
     """
 
     # Define Destiny Location for Output:
-    save_dir = "XXX"
+    save_dir = args.save_dir
 
     # Basic Carla Simulation Setup:
-    client = carla.Client(host='localhost', port=2000)
+    client = carla.Client(host='localhost', port=args.port)
     client.set_timeout(15.0)
 
     # Get prepared Maps:
     data_gen_maps = []
     maps = client.get_available_maps()
     for element in maps:
-        data_gen_maps.append(element)
+        if 'DataGenTown03' in element:
+        # print(element)
+        # if element == '/Game/Carla/Maps/DataGenTown03':
+            data_gen_maps.append(element)
 
     """
     STARTING DATA GENERATION: num_sequences Iterations
     """
-    num_sequences = 2
+    num_sequences = args.seq
 
     for iteration in range(num_sequences):
 
         # Generate Store Directory:
-        global store_dir_pc, store_dir_labels, store_dir_pcint
+        global store_dir_pc, store_dir_labels, store_dir_pccosang
         gen_iteration = iteration
-        store_dir_pc = save_dir + "sequence{0:04}/cube_pc/".format(gen_iteration)
-        store_dir_pcint = save_dir + "sequence{0:04}/cube_int/".format(gen_iteration)
+        store_dir_pc = save_dir + "sequence{0:04}/pointcloud/".format(gen_iteration)
+        store_dir_pccosang = save_dir + "sequence{0:04}/cos_ang/".format(gen_iteration)
         store_dir_labels = save_dir + "sequence{0:04}/labels/".format(gen_iteration)
         if not os.path.exists(store_dir_pc):
             os.makedirs(store_dir_pc)
-        if not os.path.exists(store_dir_pcint):
-            os.makedirs(store_dir_pcint)
+        if not os.path.exists(store_dir_pccosang):
+            os.makedirs(store_dir_pccosang)
         if not os.path.exists(store_dir_labels):
             os.makedirs(store_dir_labels)
 
@@ -292,7 +297,7 @@ def main():
         Sensor Setup
         """
         # Generate Blickfeld Sensor Blueprint - Settings can be changed within this function:
-        lidar_bf_bp = blickfeld_utils.create_blickfeld_lidar_blueprint(world, blueprint_library, delta)
+        lidar_bf_bp = lidar_utils.generate_lidar_bp(args, world, blueprint_library, delta)
 
         # Set initial Sensor/Spectator Transformation:
 
@@ -318,13 +323,11 @@ def main():
             print('\n -- Iteration ', index, '/', lidar_spawn_points_sphere.shape[0])
 
             # Update Lidar and Spectator Transformation:
-            # transformation_world_sensor = center_sensor(sphere_translation, radius_sphere, center_spawnfield)
-            # print('Transformation Lidar: ', transformation_world_sensor)
             lidar_bf.set_transform(center_sensor(sphere_translation, radius_sphere, center_spawnfield))
             spectator.set_transform(center_sensor(sphere_translation, radius_sphere, center_spawnfield))
 
             # This can fix Open3D jittering issues:
-            time.sleep(0.05)
+            time.sleep(1.15)
             world.tick()
 
             process_time = datetime.now() - dt0
@@ -380,4 +383,14 @@ LABEL_COLORS = np.array([
 
 
 if __name__ =='__main__':
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--save_dir', type=str, default=None, help='specify save directory of dataset')
+    parser.add_argument('--seq', type=int, default=1, help='specify amount of sequences')
+    parser.add_argument('--port', type=int, default=2000, help='specify port for client')
+    parser.add_argument('--semantic', type=bool, default=False, help='specify label output')
+    parser.add_argument('--no_noise', type=bool, default=False, help='specify noise input')
+
+    args = parser.parse_args()
+
+    main(args)
