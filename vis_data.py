@@ -57,14 +57,10 @@ def main(args):
     # Set the Loading Paths:
     pc_path = args.data_dir + "/sequence{:04n}".format(args.sample_seq) + "/pointcloud/{}.npy".format(args.sample)
     lbl_path = args.data_dir + "/sequence{:04n}".format(args.sample_seq) + "/labels/{}.npy".format(args.sample)
-
-    print('Color: ', LABEL_COLORS[4])
     
     # Load Point Cloud and Labels:
     point_cloud = np.load(pc_path)
     gt_labels = np.load(lbl_path)
-
-    print(point_cloud.shape, gt_labels.shape, np.unique(gt_labels[0]), np.unique(gt_labels[1]))
 
     # Extract Labels:
     labels = gt_labels[0]
@@ -79,6 +75,7 @@ def main(args):
     color_ins = np.zeros((instances.shape[0], 3))
     unq = np.unique(instances)
     instances_unq = np.zeros((instances.shape[0]))
+    
     # Make Instances hashable for Color Map:
     for idx, value in enumerate(unq):
         instances_unq[instances == value] = idx
