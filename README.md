@@ -20,7 +20,11 @@ Install dependencies by
 pip install -r requirements.txt
 ```
 ## Data Generation
-
+Launch CARLA
+```shell
+cd CARLA_ROOT_DIR && make launch 
+```
+Start data generation pipeline with specified saving directory and amount of sequences
 ```shell
 python data_generation.py --save_dir SAVE_DIRECTORY --seq AMOUNT_SEQUENCES 
 ```
@@ -28,7 +32,7 @@ python data_generation.py --save_dir SAVE_DIRECTORY --seq AMOUNT_SEQUENCES
 Dataset with the following folder structure should be generated
 ```
 
-├──data/
+├──SAVE_DIRECTORY/
     ├── sequence0000/           
     │   ├── cos_ang/
     |         ├── 0.npy
@@ -43,6 +47,7 @@ Dataset with the following folder structure should be generated
         └── ...
 ```
 ## Data Visualization
+We provide a simple visualization tool that can be executed via
 ```shell
 python vis_data.py --data_dir PATH_TO_DATA --sample_seq SEQUENCE_IDX --sample SAMPLE_IDX
 ```
