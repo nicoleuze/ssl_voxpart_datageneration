@@ -20,7 +20,7 @@ Install dependencies by
 pip install -r requirements.txt
 ```
 ## Data Generation
-Launch CARLA
+After successful installation (2), launch CARLA via
 ```shell
 cd CARLA_ROOT_DIR && make launch 
 ```
