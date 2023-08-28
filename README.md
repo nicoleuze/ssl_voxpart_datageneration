@@ -15,6 +15,8 @@ Following the install documents from the official [Carla Documentation](https://
 > Code is tested with CARLA Version 0.9.13 on Ubuntu 20.04
 
 ### 3. Install Dependencies
+Within [requirements.txt](./requirements.txt) change path to CARLA Wheel (Line 5) according to your local CARLA installation.
+
 Install dependencies by 
 ```shell
 pip install -r requirements.txt
