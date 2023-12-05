@@ -58,13 +58,15 @@ python vis_data.py --data_dir PATH_TO_DATA --sample_seq SEQUENCE_IDX --sample SA
 # Citation
 Please cite our paper if this code benefits your research:
 ```
-@InProceedings{leuze_2023_IEEESensors,
-author = {Leuze, Nico and Schaub, Henry and Hoh, Maximilian and Schoettl, Alfred},
-title = {SSL-VoxPart: A Novel Solid-State LiDAR-Tailored Voxel Partition Approach for 3D Perception},
-booktitle = {Proceedings of the 2023 IEEESensors},
-month = {October},
-year = {2023}
-}
+@INPROCEEDINGS{10324983,
+  author={Leuze, Nico and Schaub, Henry and Hoh, Maximilian and Schoettl, Alfred},
+  booktitle={2023 IEEE SENSORS}, 
+  title={SSL-VoxPart: A Novel Solid-State LiDAR-Tailored Voxel Partition Approach for 3D Perception}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-4},
+  doi={10.1109/SENSORS56945.2023.10324983}}
 ```
 
 
